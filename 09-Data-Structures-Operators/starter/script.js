@@ -27,3 +27,85 @@ const restaurant = {
     },
   },
 };
+
+const questions = new Map([
+  ['questions', 'what is the best programming language in the world?'],
+  [1, 'c'],
+  [2, 'Java'],
+  [3, 'JavaScript'],
+  [true, 'Correct😁'],
+  [false, 'Try again!'],
+]);
+
+// const answer = prompt(questions.get('questions'));
+// console.log(questions.get(Number(answer)));
+// console.log(questions.get(answer === questions.get(3)));
+// console.log([...questions]);
+// for (const [num, item] of questions.entries()) console.log(num, item);
+// console.log(num);
+
+const gameEvents = new Map([
+  [17, '⚽ GOAL'],
+  [36, '� Substitution'],
+  [47, '⚽ GOAL'],
+  [61, '� Substitution'],
+  [64, '� Yellow card'],
+  [69, '� Red card'],
+  [70, '� Substitution'],
+  [72, '� Substitution'],
+  [76, '⚽ GOAL'],
+  [80, '⚽ GOAL'],
+  [92, '� Yellow card'],
+]);
+
+/*
+//1.
+const events = new Set(gameEvents.values());
+// for (const [key, value] of gameEvents) events.add(value);
+console.log(events);
+
+//2.
+const gameEvents2 = gameEvents;
+gameEvents2.delete(64);
+console.log(gameEvents2);
+
+//3.
+
+console.log(
+  `An event happened, on average of every ${90 / gameEvents.size} minutes`
+);
+
+//4.
+for (const [key, value] of gameEvents)
+  console.log(
+    key <= 45 ? `[FIRST HALF]${key}: ${value}` : `[SECOND HALF]${key}: ${value}`
+  );
+*/
+
+//challenge 4
+
+document.body.append(document.createElement('textarea'));
+document.body.append(document.createElement('button'));
+const text = document.querySelector('textarea').value;
+
+document.querySelector('button').addEventListener('click', function () {
+  const text = document.querySelector('textarea').value;
+  const arr = text.split('\n');
+  // console.log(arr);
+  for (const str of arr) {
+    // console.log(str);
+    const trimedLowered = str.trim().toLowerCase();
+    const splited = trimedLowered.split('_');
+    let newSplited = [];
+    for (const i of splited) {
+      newSplited.push(i[0].toUpperCase() + i.slice(1));
+    }
+    console.log(newSplited.join(''));
+  }
+});
+
+// underscore_case;
+// first_name;
+// Some_Variable;
+// calculate_AGE;
+// delayed_departure;
