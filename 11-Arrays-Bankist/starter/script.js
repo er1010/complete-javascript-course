@@ -61,10 +61,162 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+const calcDisplayMovements = function (movements, sort = false) {
+  containerMovements.innerHTML = '';
+
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const html = `
+      <div class="movements__row">
+        <div class="movements__type movements__type--${type}">${
+      i + 1
+    }${type}</div>
+        <div class="movements__value">${mov}</div>
+      </div>
+    `;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance}EURO`;
+};
+
+const calcDisplaySummary = function (acc) {
+  const income = acc.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  // console.log(income);
+  labelSumIn.textContent = income;
+  const outcome = acc.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + Math.abs(mov), 0);
+  labelSumOut.textContent = outcome;
+  const interest = acc.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * acc.interestRate) / 100)
+    .filter(deposit => deposit >= 1)
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = interest;
+};
+
+// calcDisplaySummary(account1.movements);
+
+const creatUserName = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(value => value[0])
+      .join('');
+    // console.log(username);
+  });
+};
+
+creatUserName(accounts);
+
+const updateUI = function (currentAccount) {
+  calcDisplayMovements(currentAccount.movements);
+
+  calcDisplayBalance(currentAccount);
+
+  calcDisplaySummary(currentAccount);
+};
+
+//event handler
+
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    labelWelcome.textContent = `Welcom back, ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 100;
+
+    //clear input field
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    updateUI(currentAccount);
+  }
+
+  btnTransfer.addEventListener('click', function (e) {
+    e.preventDefault();
+    const amount = Number(inputTransferAmount.value);
+    const receiverAcc = accounts.find(
+      acc => acc.username === inputTransferTo.value
+    );
+
+    inputTransferAmount.value = inputTransferTo.value = '';
+
+    if (
+      amount > 0 &&
+      currentAccount.balance >= amount &&
+      receiverAcc?.username !== currentAccount.username
+    ) {
+      currentAccount.movements.push(-amount);
+      receiverAcc.movements.push(amount);
+      updateUI(currentAccount);
+    }
+  });
+
+  btnLoan.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const amount = Number(inputLoanAmount.value);
+
+    if (
+      amount > 0 &&
+      currentAccount.movements.some(mov => mov >= amount * 0.1)
+    ) {
+      currentAccount.movements.push(amount);
+
+      updateUI(currentAccount);
+    }
+  });
+
+  btnClose.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    if (
+      inputCloseUsername.value === currentAccount.username &&
+      Number(inputClosePin.value) === currentAccount.pin
+    ) {
+      const index = accounts.findIndex(
+        acc => acc.username === currentAccount.username
+      );
+      accounts.splice(index, 1);
+
+      containerApp.style.opacity = 0;
+    }
+  });
+
+  let sorted = false;
+  btnSort.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    calcDisplayMovements(currentAccount.movements, !sorted);
+    sorted = !sorted;
+
+    // updateUI(currentAccount);
+  });
+});
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
-
+/*
 const currencies = new Map([
   ['USD', 'United States dollar'],
   ['EUR', 'Euro'],
@@ -74,3 +226,43 @@ const currencies = new Map([
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
+currencies.forEach(function (value, key, map) {
+  console.log(`${key}: ${value}`);
+});
+*/
+
+//challenge 1
+/*
+const dogsJulia = [3, 5, 2, 12, 7];
+const dogsKate = [4, 1, 15, 8, 3];
+
+const checkDogs = function () {
+  const dogsJulia2 = dogsJulia.slice(1, -2);
+  const allDogs = dogsJulia2.concat(dogsKate);
+  console.log(allDogs);
+  allDogs.forEach(function (value, i) {
+    if (value >= 3)
+      console.log(`Dog number ${i + 1} is an adult, and is ${value} years old`);
+    else console.log(`Dog number ${i + 1} is still a puppy👌`);
+  });
+};
+checkDogs();
+*/
+
+/*challenge 3
+
+Rewrite the 'calcAverageHumanAge' function from Challenge #2, but this time 
+as an arrow function, and using chaining!
+Test data:
+§ Data 1: [5, 2, 4, 1, 15, 8, 3]
+§ Data 2: [16, 6, 10, 5, 6, 1, 4]
+*/
+
+const calcAverageHumanAge = ages =>
+  ages
+    .map(age => (age <= 2 ? age * 2 : 16 + age * 4))
+    .filter(age => age >= 18)
+    .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+const data1 = calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
+const data2 = calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]);
+console.log(data1, data2);
